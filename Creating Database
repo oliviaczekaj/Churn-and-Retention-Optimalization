@@ -1,0 +1,108 @@
+from datetime import datetime
+from faker import Faker
+import numpy as np
+import pandas as pd
+
+f = Faker()
+Faker.seed(40)
+np.random.seed(40)
+
+customer_num = 2000
+data = []
+
+# Generating data
+for i in range(customer_num):
+    customer_id = f"CUSTOMER_{i}"
+    company_name = f.company()
+    contact_person = f.name()
+    email = f.company_email()
+    phone = f.phone_number()
+    city = f.city()
+    signup_date = f.date_between(start_date="-1y", end_date="now")
+
+    # Choosing plan
+    plan_type = np.random.choice(
+        ["Basic", "Pro", "Enterprise"], p=[0.6, 0.3, 0.1]
+    )
+    plan_map = {"Basic": 149, "Pro": 499, "Enterprise": 999}
+    price = plan_map[plan_type]
+
+    # Churn or not and behaviour (teraz jest Wewnątrz pętli)
+    is_churn = np.random.rand() < 0.1
+    if is_churn:
+        last_login_days_ago = min(90, int(np.random.normal(30, 10)))
+        active_users_pct = round(max(5.0, np.random.normal(20, 10)), 1)
+        support_tickets_90d = int(np.random.poisson(4) + 2)
+        feature_usage_score = round(max(10.0, np.random.normal(25, 10)), 1)
+    else:
+        last_login_days_ago = min(90, max(0, int(np.random.exponential(4))))
+        active_users_pct = round(
+            max(10.0, min(100.0, np.random.normal(70, 15))), 1
+        )
+        support_tickets_90d = int(np.random.poisson(1))
+        feature_usage_score = round(
+            max(15.0, min(100.0, np.random.normal(75, 15))), 1
+        )
+
+    # Adding to the list
+    data.append([
+        customer_id,
+        company_name,
+        contact_person,
+        email,
+        phone,
+        city,
+        signup_date,
+        plan_type,
+        price,
+        last_login_days_ago,
+        active_users_pct,
+        support_tickets_90d,
+        feature_usage_score,
+    ])
+
+# DataFrame
+columns = [
+    "customer_id",
+    "company_name",
+    "contact_person",
+    "email",
+    "phone",
+    "city",
+    "signup_date",
+    "plan_type",
+    "price",
+    "last_login_days_ago",
+    "active_users_pct",
+    "support_tickets_90d",
+    "feature_usage_score",
+]
+
+df = pd.DataFrame(data, columns=columns)
+
+# Relationship with the customer score
+df["relationship_score"] = np.clip(
+    (
+        (100 - np.minimum(df["last_login_days_ago"] * 2.5, 100)) * 0.35
+        + df["active_users_pct"] * 0.30
+        + df["feature_usage_score"] * 0.35
+        - np.maximum(0, df["support_tickets_90d"] - 2) * 4.5
+    ).round(1),
+    0,
+    100,
+)
+
+
+# Assigning risk
+def risk(x):
+    if x < 45:
+        return "High Risk"
+    elif x < 75:
+        return "Medium Risk"
+    else:
+        return "Low Risk"
+
+
+df["risk_segment"] = df["relationship_score"].apply(risk)
+
+df.to_csv("my_dataset.csv", index=False)
