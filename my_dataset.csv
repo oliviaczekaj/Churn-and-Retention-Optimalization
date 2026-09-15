@@ -9,7 +9,6 @@ np.random.seed(40)
 
 customer_num = 2000
 data = []
-
 # Generating data
 for i in range(customer_num):
     customer_id = f"CUSTOMER_{i:04d}"  # Zapis typu CUSTOMER_0001 wygląda czytelniej w tabeli
