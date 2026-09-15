@@ -9,6 +9,7 @@ np.random.seed(40)
 
 customer_num = 2000
 data = []
+
 # Generating data
 for i in range(customer_num):
     customer_id = f"CUSTOMER_{i:04d}"  # Zapis typu CUSTOMER_0001 wygląda czytelniej w tabeli
@@ -17,7 +18,7 @@ for i in range(customer_num):
     email = f.company_email()
     phone = f.phone_number()
     city = f.city()
-    signup_date = f.date_between(start_date="-1y", end_date="now")
+   signup_date = f.date_between(start_date = '-1y', end_date = 'now')
 
     # Choosing plan
     plan_type = np.random.choice(
