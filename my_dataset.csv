@@ -12,13 +12,13 @@ data = []
 
 # Generating data
 for i in range(customer_num):
-    customer_id = f"CUSTOMER_{i:04d}"  # Zapis typu CUSTOMER_0001 wygląda czytelniej w tabeli
+    customer_id = f"CUSTOMER_{i:04d}"
     company_name = f.company()
     contact_person = f.name()
     email = f.company_email()
     phone = f.phone_number()
     city = f.city()
-   signup_date = f.date_between(start_date = '-1y', end_date = 'now')
+    signup_date = f.date_between(start_date="-1y", end_date="now")
 
     # Choosing plan
     plan_type = np.random.choice(
@@ -103,6 +103,7 @@ def risk(x):
 
 df["risk_segment"] = df["relationship_score"].apply(risk)
 
+# Formatting for clean visual view
 df["signup_date"] = pd.to_datetime(df["signup_date"]).dt.strftime("%Y-%m-%d")
 df["relationship_score"] = df["relationship_score"].round(1)
 
