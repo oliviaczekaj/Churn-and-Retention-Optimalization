@@ -12,7 +12,7 @@ data = []
 
 # Generating data
 for i in range(customer_num):
-    customer_id = f"CUSTOMER_{i}"
+    customer_id = f"CUSTOMER_{i:04d}"  # Zapis typu CUSTOMER_0001 wygląda czytelniej w tabeli
     company_name = f.company()
     contact_person = f.name()
     email = f.company_email()
@@ -27,7 +27,7 @@ for i in range(customer_num):
     plan_map = {"Basic": 149, "Pro": 499, "Enterprise": 999}
     price = plan_map[plan_type]
 
-    # Churn or not and behaviour (teraz jest Wewnątrz pętli)
+    # Churn behavior simulation
     is_churn = np.random.rand() < 0.1
     if is_churn:
         last_login_days_ago = min(90, int(np.random.normal(30, 10)))
@@ -44,7 +44,6 @@ for i in range(customer_num):
             max(15.0, min(100.0, np.random.normal(75, 15))), 1
         )
 
-    # Adding to the list
     data.append([
         customer_id,
         company_name,
@@ -61,7 +60,7 @@ for i in range(customer_num):
         feature_usage_score,
     ])
 
-# DataFrame
+# DataFrame columns
 columns = [
     "customer_id",
     "company_name",
@@ -80,7 +79,7 @@ columns = [
 
 df = pd.DataFrame(data, columns=columns)
 
-# Relationship with the customer score
+# Relationship score calculation
 df["relationship_score"] = np.clip(
     (
         (100 - np.minimum(df["last_login_days_ago"] * 2.5, 100)) * 0.35
@@ -93,7 +92,6 @@ df["relationship_score"] = np.clip(
 )
 
 
-# Assigning risk
 def risk(x):
     if x < 45:
         return "High Risk"
@@ -104,5 +102,8 @@ def risk(x):
 
 
 df["risk_segment"] = df["relationship_score"].apply(risk)
+
+df["signup_date"] = pd.to_datetime(df["signup_date"]).dt.strftime("%Y-%m-%d")
+df["relationship_score"] = df["relationship_score"].round(1)
 
 df.to_csv("my_dataset.csv", index=False)
